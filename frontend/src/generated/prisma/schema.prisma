@@ -1,0 +1,175 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+  output        = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum WeekDay {
+  Monday
+  Tuesday
+  Wednesday
+  Thursday
+  Friday
+  Saturday
+  Sunday
+}
+
+enum ExerciseType {
+  Strength
+  Cardio
+  Other
+}
+
+model User {
+  id        Int     @id @default(autoincrement())
+  email     String  @unique
+  name      String
+  surname   String
+  password  String
+  access    String
+  card_type String
+  age       Int?
+  gender    Gender?
+  height    Float?
+  weight    Float?
+
+  programs     UserProgram[]
+  ownPrograms  Program[]
+  ownTrainings Workout[]
+  logs         Log[]
+  stats        Statistic?
+  achievments  UserAchievment[]
+}
+
+model Exercise {
+  id          Int          @id @default(autoincrement())
+  name        String
+  type        ExerciseType
+  calories    String
+  description String?
+
+  workoutExercises WorkoutExercise[]
+}
+
+model Workout {
+  id          Int          @id @default(autoincrement())
+  name        String
+  type        ExerciseType
+  description String?
+  userId      Int?
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  workoutExercises WorkoutExercise[]
+  programWorkouts  ProgramWorkout[]
+  logs             Log[]
+}
+
+model WorkoutExercise {
+  id          Int  @id @default(autoincrement())
+  workoutId   Int
+  exerciseId  Int
+  repetitions Int?
+  distance    Int?
+
+  workout  Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@unique([workoutId, exerciseId])
+}
+
+model Program {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+  userId      Int?
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  programWorkouts ProgramWorkout[]
+  users           UserProgram[]
+}
+
+model ProgramWorkout {
+  id        Int     @id @default(autoincrement())
+  programId Int
+  workoutId Int
+  weekDay   WeekDay
+
+  program Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+  workout Workout @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+
+  @@unique([programId, workoutId])
+}
+
+model UserProgram {
+  id        Int @id @default(autoincrement())
+  programId Int
+  userId    Int
+
+  user    User    @relation(fields: [userId], references: [id])
+  program Program @relation(fields: [programId], references: [id])
+
+  @@unique([userId, programId])
+}
+
+model Log {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  workoutId Int
+  calories  Float?
+  timestamp DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workout Workout @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+}
+
+model Statistic {
+  id              Int      @id @default(autoincrement())
+  userId          Int      @unique
+  totalCalories   Int      @default(0)
+  totalWorkouts   Int      @default(0)
+  favoriteWorkout String?
+  lastActivity    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Achievment {
+  id          Int    @id @default(autoincrement())
+  name        String
+  description String
+  type        String
+  condition   Int
+
+  users UserAchievment[]
+}
+
+model UserAchievment {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  achievmentId Int
+  timestamp    DateTime @default(now())
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievment Achievment @relation(fields: [achievmentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievmentId])
+}
