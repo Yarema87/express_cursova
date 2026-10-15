@@ -9,6 +9,7 @@ import programWorkoutRoutes from './routes/workout-program.route.js';
 import exerciseRoutes from './routes/exercise.route.js';
 import workoutExerciseRoutes from './routes/exercise-workout.route.js';
 import statisticRoutes from './routes/statistic.route.js';
+import achievmentRoutes from './routes/achievment.route.js';
 import { errorMiddleware } from './middlewares/error.middleware.js';
 
 dotenv.config();
@@ -27,6 +28,7 @@ app.use('/api', programWorkoutRoutes);
 app.use('/api', exerciseRoutes);
 app.use('/api', workoutExerciseRoutes);
 app.use('/api', statisticRoutes);
+app.use('/api', achievmentRoutes);
 app.use(errorMiddleware);
 
 const PORT = 5000;
