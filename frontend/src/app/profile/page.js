@@ -74,7 +74,7 @@ function Profile(){
         const complex_url = (`http://localhost:5000/api/user/program/${user.id}`);
         const stats_url = (`http://localhost:5000/api/user/stats/${user.id}`);
         const streak_url = (`http://localhost:5000/api/statistic/streak/${user.id}`);
-        const achievements_url = (`/api/achievements?userId=${user.id}`);
+        const achievements_url = (`http://localhost:5000/api/achievment/${user.id}`);
 
         axios.get(complex_url)
         .then(response => {
@@ -102,7 +102,7 @@ function Profile(){
 
         axios.get(achievements_url)
         .then(response => {
-            setAchievements(response.data);
+            setAchievements(response.data.user_achievments);
             console.log(response.data);
         })
         .catch(error => {
